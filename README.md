@@ -5,9 +5,7 @@ This repository is a practical assessment environment for testing a Junior DevOp
 ## Assessment overview
 
 - **Type:** Practical / scenario-based
-- **Recommended duration:** 2–3 hours
-- **Total:** 100 marks
-- **Pass mark:** 70%
+- **Recommended duration:** (Unknown)
 - **Production branch:** `main`
 - **Deployment target:** Vercel
 
