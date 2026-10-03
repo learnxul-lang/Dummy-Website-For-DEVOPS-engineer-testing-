@@ -31,11 +31,6 @@ The initial website displays **Version 1.0**.
 - [Submission Requirements](assessment/SUBMISSION-REQUIREMENTS.md)
 - [README Questions](assessment/README-QUESTIONS.md)
 
-### Assessor
-- [Assessor Guide](assessor/ASSESSOR-GUIDE.md)
-- [Collaboration Incident](assessor/INCIDENT-INSTRUCTIONS.md)
-- [Marking Rubric](assessor/MARKING-RUBRIC.md)
-- [Verification Checklist](assessor/VERIFICATION-CHECKLIST.md)
 
 ## Core competencies tested
 
