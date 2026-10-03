@@ -1,0 +1,30 @@
+name: Git History Audit
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  history:
+    name: Inspect candidate commit history
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require candidate commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" "${{ github.head_ref }}"
+          count="$(git rev-list --count "origin/${{ github.base_ref }}..HEAD")"
+          echo "Candidate commits in PR: $count"
+          test "$count" -ge 1 || {
+            echo "::error::No candidate commits found ahead of the production branch."
+            exit 1
+          }
+          echo "Commit history submitted for assessor review:"
+          git --no-pager log --oneline "origin/${{ github.base_ref }}..HEAD"
