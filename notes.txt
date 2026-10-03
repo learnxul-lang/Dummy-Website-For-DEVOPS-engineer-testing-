@@ -1,0 +1,6 @@
+DevOps Assessment Starter Project
+Production branch: main
+Initial application version: 1.0
+
+This project is intentionally simple. The assessment focuses on version control,
+collaboration workflow, repository management and deployment rather than frontend design.
