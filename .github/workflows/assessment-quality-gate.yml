@@ -1,0 +1,85 @@
+name: Assessment Quality Gate
+
+on:
+  push:
+    branches: ["main", "feature-*"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  repository-safety:
+    name: Repository safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reject committed environment files
+        shell: bash
+        run: |
+          set -euo pipefail
+          tracked="$(git ls-files)"
+          if echo "$tracked" | grep -Eq '(^|/)\.env($|\.)' && ! echo "$tracked" | grep -q '^\.env\.example$'; then
+            echo "::error::A real .env-style file appears to be tracked."
+            exit 1
+          fi
+          if git ls-files | grep -Eq '(^|/)(\.env|\.env\.local)$'; then
+            echo "::error::Environment secrets must not be committed."
+            exit 1
+          fi
+          grep -Eq '^\.env$' .gitignore || { echo "::error::.gitignore must ignore .env"; exit 1; }
+
+  static-site:
+    name: Static site integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required application files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s style.css
+          test -s app.js
+          grep -q 'style.css' index.html
+          grep -q 'app.js' index.html
+
+  candidate-feature:
+    name: Candidate feature requirements
+    if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check System Status implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Eqi 'System[[:space:]]+Status' index.html || {
+            echo "::error::Required System Status section is missing from index.html."
+            exit 1
+          }
+          grep -Eqi 'Application[[:space:]]+operational' index.html || {
+            echo "::error::Required text 'Application operational' is missing."
+            exit 1
+          }
+
+  pull-request-discipline:
+    name: Pull request discipline
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require feature branch into main
+        shell: bash
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          test "$BASE" = "main" || { echo "::error::PR must target main."; exit 1; }
+          echo "$HEAD" | grep -Eq '^feature-' || {
+            echo "::error::Assessment changes must come from a feature-* branch."
+            exit 1
+          }
