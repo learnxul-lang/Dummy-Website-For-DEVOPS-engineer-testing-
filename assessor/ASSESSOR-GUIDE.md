@@ -17,10 +17,7 @@ Ensure the candidate has:
 - GitHub access.
 - Permission to work with the assigned assessment repository.
 - Vercel access.
-- Internet connectivity.
-- The starter project.
 
-The .env.example value is deliberately fake. Never place a real credential in this assessment.
 
 ## During assessment
 Inspect the repository rather than relying only on screenshots. Ask the candidate to explain where their changes currently exist: working directory, staging area, local history, remote branch, merged production branch or deployed application.
