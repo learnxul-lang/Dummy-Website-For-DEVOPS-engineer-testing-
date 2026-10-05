@@ -1,0 +1,135 @@
+name: Vercel Deployment Test
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-production-verification
+  cancel-in-progress: true
+
+jobs:
+  verify-production:
+    name: Verify Vercel production deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out production source
+        uses: actions/checkout@v4
+
+      - name: Validate deployment URL is configured
+        shell: bash
+        env:
+          VERCEL_URL: ${{ vars.VERCEL_PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VERCEL_URL}" ]; then
+            echo "::error::Repository variable VERCEL_PRODUCTION_URL is not configured."
+            echo "Add the public production URL in Settings > Secrets and variables > Actions > Variables."
+            exit 1
+          fi
+
+          case "${VERCEL_URL}" in
+            http://*|https://*) ;;
+            *)
+              echo "::error::VERCEL_PRODUCTION_URL must begin with http:// or https://"
+              exit 1
+              ;;
+          esac
+
+      - name: Determine expected production state
+        id: expected
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="$(grep -Eo 'Version[[:space:]]+[0-9]+\.[0-9]+' index.html | head -n1 || true)"
+          test -n "${version}" || {
+            echo "::error::No Version x.y string was found in index.html."
+            exit 1
+          }
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+          if grep -Eqi 'System[[:space:]]+Status' index.html; then
+            echo "system_status=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "system_status=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if grep -Eqi 'Application[[:space:]]+operational' index.html; then
+            echo "operational=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "operational=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Expected live version: ${version}"
+
+      - name: Wait for Vercel to publish current main
+        shell: bash
+        env:
+          VERCEL_URL: ${{ vars.VERCEL_PRODUCTION_URL }}
+          EXPECTED_VERSION: ${{ steps.expected.outputs.version }}
+          EXPECT_SYSTEM_STATUS: ${{ steps.expected.outputs.system_status }}
+          EXPECT_OPERATIONAL: ${{ steps.expected.outputs.operational }}
+        run: |
+          set -euo pipefail
+
+          url="${VERCEL_URL%/}/"
+          body_file="$(mktemp)"
+
+          for attempt in {1..24}; do
+            echo "Deployment check ${attempt}/24: ${url}"
+
+            http_code="$(curl               --silent               --show-error               --location               --connect-timeout 10               --max-time 20               --output "${body_file}"               --write-out '%{http_code}'               "${url}" || true)"
+
+            if [ "${http_code}" = "200" ] && grep -Fqi "${EXPECTED_VERSION}" "${body_file}"; then
+              if [ "${EXPECT_SYSTEM_STATUS}" = "true" ] && ! grep -Eqi 'System[[:space:]]+Status' "${body_file}"; then
+                echo "Live site has the expected version but System Status is not deployed yet."
+              elif [ "${EXPECT_OPERATIONAL}" = "true" ] && ! grep -Eqi 'Application[[:space:]]+operational' "${body_file}"; then
+                echo "Live site has the expected version but Application operational is not deployed yet."
+              else
+                echo "Vercel deployment matches the current main branch."
+                exit 0
+              fi
+            else
+              echo "Live site not ready yet. HTTP ${http_code}; expected ${EXPECTED_VERSION}."
+            fi
+
+            sleep 10
+          done
+
+          echo "::error::Vercel production did not match the current main branch within the verification window."
+          echo "Expected: ${EXPECTED_VERSION}"
+          exit 1
+
+      - name: Production smoke test
+        shell: bash
+        env:
+          VERCEL_URL: ${{ vars.VERCEL_PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          url="${VERCEL_URL%/}/"
+          headers="$(mktemp)"
+          body="$(mktemp)"
+
+          curl             --fail             --silent             --show-error             --location             --dump-header "${headers}"             --output "${body}"             "${url}"
+
+          grep -Eqi '<html|<!DOCTYPE html' "${body}" || {
+            echo "::error::Production response does not appear to be HTML."
+            exit 1
+          }
+
+          test -s "${body}" || {
+            echo "::error::Production response body is empty."
+            exit 1
+          }
+
+          echo "Production smoke test passed."
