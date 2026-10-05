@@ -12,7 +12,7 @@ Demonstrate that you can manage the project through local version control, remot
 3. Ensure environment configuration and other inappropriate local files cannot accidentally be published.
 4. Establish a meaningful local project history.
 5. Connect your local work to the assigned GitHub repository and publish the required work.
-6. Perform new development on a separate feature branch rather than making the requested change directly on the production branch.
+6. Perform new development on a separate feature branch rather than making the requested change directly on the production branch. **Feature branch names must follow the convention `feature-*`**, for example `feature-status`, `feature-release` or `feature-readme`.
 7. Add a visible **System Status** section containing: **Application operational**.
 8. Record the change with a meaningful history entry and publish the feature work.
 9. Create a Pull Request with a useful description of the proposed change.
