@@ -2,7 +2,6 @@ name: Assessment Quality Gate
 
 on:
   push:
-    branches: ["main", "feature-*"]
   pull_request:
     branches: ["main"]
 
@@ -10,6 +9,23 @@ permissions:
   contents: read
 
 jobs:
+  branch-naming:
+    name: Feature branch naming convention
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require feature-* branch naming convention
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "Checking branch name: $BRANCH_NAME"
+          echo "$BRANCH_NAME" | grep -Eq '^feature-[A-Za-z0-9][A-Za-z0-9._-]*$' || {
+            echo "::error::Feature branch name must follow the convention feature-*. Examples: feature-status, feature-release, feature-readme."
+            exit 1
+          }
+
   repository-safety:
     name: Repository safety
     runs-on: ubuntu-latest
@@ -79,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$BASE" = "main" || { echo "::error::PR must target main."; exit 1; }
-          echo "$HEAD" | grep -Eq '^feature-' || {
-            echo "::error::Assessment changes must come from a feature-* branch."
+          echo "$HEAD" | grep -Eq '^feature-[A-Za-z0-9][A-Za-z0-9._-]*$' || {
+            echo "::error::Feature branch name must follow the convention feature-*."
             exit 1
           }
