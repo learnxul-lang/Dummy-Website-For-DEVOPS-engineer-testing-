@@ -12,6 +12,9 @@ Connected local repository with remote repository by commiting changes.
 
 ## Repository History
 
+<img width="957" height="556" alt="Screenshot 2026-10-06 213951" src="https://github.com/user-attachments/assets/bb4e92bd-8049-4232-8bfe-a51dafdbd590" />
+
+
 ## Initial deployment 
 
 # README ANSWERS
