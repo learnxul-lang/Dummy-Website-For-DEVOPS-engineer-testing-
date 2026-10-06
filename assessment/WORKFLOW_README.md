@@ -7,6 +7,8 @@ Connected local repository with remote repository by commiting changes.
 
 <img width="1871" height="741" alt="Screenshot 2026-10-05 001003" src="https://github.com/user-attachments/assets/311d775c-f035-4473-a84a-89e10e2760e6" />
 
+<img width="1756" height="643" alt="Screenshot 2026-10-05 000948" src="https://github.com/user-attachments/assets/9ab5feb8-08be-4d16-b465-264418f60589" />
+
 
 ## Repository History
 
