@@ -16,6 +16,10 @@ Connected local repository with remote repository by commiting changes.
 
 
 ## Initial deployment 
+https://dummy-website-one-khaki.vercel.app/
+
+<img width="1695" height="952" alt="image" src="https://github.com/user-attachments/assets/95e9ee02-a571-47b3-8321-4f6c3977ff63" />
+
 
 # README ANSWERS
 1. GIT is a local version control software, thats installed locally, interface is the Command-line interface and its purpose is to track history and code changes made on local machine while GITHUB is a cloud-based hosting software, installed on remote cloud, interface is web user interface and its purpose is to share code and manage team collaboration.
