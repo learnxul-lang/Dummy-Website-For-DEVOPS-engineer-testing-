@@ -3,7 +3,10 @@ Created new branch called "feature-branch1" then created folder "DevOps_Activity
 Checked status of the repository, and the log history.
 Connected local repository with remote repository by commiting changes.
 
-## Evidence of feature branch ("feature_branch3") and Pull request.
+## Evidence of feature branch ("feature-branch3") and Pull request.
+
+<img width="1871" height="741" alt="Screenshot 2026-10-05 001003" src="https://github.com/user-attachments/assets/311d775c-f035-4473-a84a-89e10e2760e6" />
+
 
 ## Repository History
 
